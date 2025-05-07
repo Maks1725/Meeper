@@ -1,6 +1,6 @@
 #include <raylib.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
     int grid_width = 10;
     int grid_height = 10;
     int cell_size = 40;
