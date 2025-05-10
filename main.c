@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <string.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
     int grid_width = 10;
@@ -15,13 +16,27 @@ int main(int argc, char *argv[]) {
 
     bool mines[grid_width][grid_height];
     int numbers[grid_width][grid_height];
+    int board[grid_width][grid_height];
     memset(mines, 0, sizeof(mines));
     memset(numbers, 0, sizeof(numbers));
-    mines[2][4] = true;
+    memset(board, 0, sizeof(board));
+
+    for (int i = 0; i < mine_amount; ++i) {
+        posx = rand() % grid_width;
+        posy = rand() % grid_height;
+        if (mines[posx][posy]) {
+            --i;
+        }
+        mines[posx][posy] = true;
+    }
 
     for (int x = 0; x < grid_width; ++x) {
         for (int y = 0; y < grid_height; ++y) {
-            numbers[x][y] = mines[x][y] ? 1 : 0;
+            for(posx = x - 1 < 0 ? 0 : x - 1; posx < x + 2 && posx < grid_width; ++posx) {
+                for (posy = y - 1 < 0 ? 0 : y - 1; posy < y + 2 && posy < grid_height; ++posy) {
+                    numbers[posx][posy] += mines[x][y] ? 1 : 0;
+                }
+            }
         }
     }
 
@@ -39,9 +54,13 @@ int main(int argc, char *argv[]) {
             for (int y = 0; y < grid_height; ++y) {
                 posx = border_out + x * (cell_size + border);
                 posy = (border_out + 100) + y * (cell_size + border);
-                DrawRectangle(posx, posy,
-                              cell_size, cell_size, LIGHTGRAY);
-                DrawText(TextFormat("%d", numbers[x][y]), posx, posy, font_size, WHITE);
+                switch (board[x][y]) {
+                    case 0:
+                        DrawRectangle(posx, posy, cell_size, cell_size, LIGHTGRAY);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         
@@ -50,3 +69,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
