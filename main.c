@@ -46,6 +46,12 @@ void OpenCells(int x, int y, int board[grid_width][grid_height], int numbers[gri
 }
 
 int main(int argc, char *argv[]) {
+    if (argc == 4) {
+        grid_width = atoi(argv[1]);
+        grid_height = atoi(argv[2]);
+        mine_amount = atoi(argv[3]);
+    }
+    
     int posx;
     int posy;
     int mousex;
@@ -82,7 +88,7 @@ int main(int argc, char *argv[]) {
     }
 
     int window_width = grid_width * cell_size + (grid_width - 1) * border + border_out * 2;
-    int window_height = grid_height * cell_size + (grid_height - 1) * border + top_space + border_out * 2;
+    int window_height = grid_height * cell_size + (grid_height - 1) * border + top_space + border_out * 3;
     
     InitWindow(window_width, window_height, "Meeper");
 
@@ -95,7 +101,7 @@ int main(int argc, char *argv[]) {
         for (int x = 0; x < grid_width; ++x) {
             for (int y = 0; y < grid_height; ++y) {
                 posx = border_out + x * (cell_size + border);
-                posy = (border_out + top_space) + y * (cell_size + border);
+                posy = border_out * 2 + top_space + y * (cell_size + border);
                 if (mousex >= posx && mousex <= posx + cell_size && mousey >= posy && mousey <= posy + cell_size) {
                     selectx = x;
                     selecty = y;
@@ -103,32 +109,34 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if (board[selectx][selecty] == 0) {
-                if (mines[selectx][selecty]) {
-                    for (int x = 0; x < grid_width; ++x) {
-                        for (int y = 0; y < grid_height; ++y) {
-                            if (mines[x][y]) {
-                                board[x][y] = 1;
+        if (selectx >= 0 && selecty >= 0) {
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                if (board[selectx][selecty] == 0) {
+                    if (mines[selectx][selecty]) {
+                        for (int x = 0; x < grid_width; ++x) {
+                            for (int y = 0; y < grid_height; ++y) {
+                                if (mines[x][y]) {
+                                    board[x][y] = 1;
+                                }
                             }
                         }
-                    }
-                } else {
-                    if (numbers[selectx][selecty] == 0) {
-                        OpenCells(selectx, selecty, board, numbers);
                     } else {
-                        board[selectx][selecty] = 1;
-                        cells_opened++;
+                        if (numbers[selectx][selecty] == 0) {
+                            OpenCells(selectx, selecty, board, numbers);
+                        } else {
+                            board[selectx][selecty] = 1;
+                            cells_opened++;
+                        }
                     }
                 }
-            }
-        } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-            if (board[selectx][selecty] == 0) {
-                board[selectx][selecty] = 2;
-                flags_placed++;
-            } else if (board[selectx][selecty] == 2) {
-                board[selectx][selecty] = 0;
-                flags_placed--;
+            } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+                if (board[selectx][selecty] == 0) {
+                    board[selectx][selecty] = 2;
+                    flags_placed++;
+                } else if (board[selectx][selecty] == 2) {
+                    board[selectx][selecty] = 0;
+                    flags_placed--;
+                }
             }
         }
 
@@ -136,10 +144,13 @@ int main(int argc, char *argv[]) {
 
         ClearBackground(GRAY);
 
+        DrawRectangle(border_out, border_out, grid_width * (cell_size + border) - border, top_space, LIGHTGRAY);
+        DrawText(TextFormat("%d", mine_amount - flags_placed), border_out + 10, border_out + (top_space - font_size) / 2, font_size, BLACK);
+
         for (int x = 0; x < grid_width; ++x) {
             for (int y = 0; y < grid_height; ++y) {
                 posx = border_out + x * (cell_size + border);
-                posy = (border_out + top_space) + y * (cell_size + border);
+                posy = border_out * 2 + top_space + y * (cell_size + border);
                 switch (board[x][y]) {
                     // Hidden cell
                     case 0: 
